@@ -22,16 +22,12 @@ namespace Timberborn.Splicetails {
             var blockObject = GetComponent<BlockObject>();
             if (blockObject == null) return;
 
-            // Use the door tile as the centre; excavate a 3x3 footprint below it.
+            // Building is 3x3. Excavate one layer below each surface tile.
+            // coord.z = surface; coord.z-1 removed by building; coord.z-2 = the chamber.
             foreach (var coord in blockObject.PositionedBlocks.GetAllCoordinates()) {
-                for (int dx = -1; dx <= 1; dx++) {
-                    for (int dy = -1; dy <= 1; dy++) {
-                        var excavate = new Vector3Int(coord.x + dx, coord.y + dy, coord.z - 2);
-                        if (excavate.z >= 0)
-                            _terrainDestroyer.DestroyTerrain(excavate);
-                    }
-                }
-                break; // only one block in the 1x1 building
+                var excavate = new Vector3Int(coord.x, coord.y, coord.z - 2);
+                if (excavate.z >= 0)
+                    _terrainDestroyer.DestroyTerrain(excavate);
             }
         }
 
