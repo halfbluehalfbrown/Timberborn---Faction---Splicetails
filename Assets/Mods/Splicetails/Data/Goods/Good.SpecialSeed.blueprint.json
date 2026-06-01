@@ -1,0 +1,20 @@
+{
+  "GoodSpec": {
+    "Id": "SpecialSeed",
+    "BackwardCompatibleIds": [],
+    "ConsumptionEffects": [],
+    "GoodType": "Box",
+    "StockpileVisualization": "Box",
+    "VisibleContainer": "Box",
+    "ContainerColor": { "r": 0.1, "g": 0.7, "b": 0.5, "a": 1.0 },
+    "ContainerMaterial": "",
+    "CarryingAnimation": "CarryInHands",
+    "Weight": 1,
+    "GoodGroupId": "Ingredients",
+    "GoodOrder": 9025,
+    "Icon": "Sprites/Goods/SunflowerSeedsIcon",
+    "ForceImport": false,
+    "DisplayNameLocKey": "Good.SpecialSeed.DisplayName",
+    "PluralDisplayNameLocKey": "Good.SpecialSeed.PluralDisplayName"
+  }
+}

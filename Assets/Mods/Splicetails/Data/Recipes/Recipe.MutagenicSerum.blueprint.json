@@ -1,0 +1,20 @@
+{
+  "RecipeSpec": {
+    "Id": "MutagenicSerum",
+    "BackwardCompatibleIds": [],
+    "DisplayLocKey": "Manufactory.Recipe.MutagenicSerum",
+    "CycleDurationInHours": 3.0,
+    "Ingredients": [
+      { "Id": "Badwater", "Amount": 4 }
+    ],
+    "Products": [
+      { "Id": "MutagenicSerum", "Amount": 2 }
+    ],
+    "ProducedSciencePoints": -10,
+    "Fuel": "",
+    "CyclesFuelLasts": 0,
+    "FuelCapacity": 0,
+    "CyclesCapacity": 20,
+    "Icon": "Sprites/Goods/ExtractIcon"
+  }
+}

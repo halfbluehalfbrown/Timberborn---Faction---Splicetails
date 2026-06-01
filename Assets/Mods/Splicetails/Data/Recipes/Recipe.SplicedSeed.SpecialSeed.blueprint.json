@@ -1,0 +1,22 @@
+{
+  "RecipeSpec": {
+    "Id": "SplicedSeed.SpecialSeed",
+    "BackwardCompatibleIds": [],
+    "DisplayLocKey": "Manufactory.Recipe.SplicedSeed.SpecialSeed",
+    "CycleDurationInHours": 6.0,
+    "Ingredients": [
+      { "Id": "SpecialSeed", "Amount": 2 },
+      { "Id": "MutagenicSerum", "Amount": 1 },
+      { "Id": "Extract", "Amount": 1 }
+    ],
+    "Products": [
+      { "Id": "SplicedSeed", "Amount": 1 }
+    ],
+    "ProducedSciencePoints": 0,
+    "Fuel": "",
+    "CyclesFuelLasts": 0,
+    "FuelCapacity": 0,
+    "CyclesCapacity": 20,
+    "Icon": "Sprites/Goods/SunflowerSeedsIcon"
+  }
+}

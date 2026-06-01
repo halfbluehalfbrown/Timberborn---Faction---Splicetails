@@ -1,0 +1,20 @@
+{
+  "GoodSpec": {
+    "Id": "MutagenicSerum",
+    "BackwardCompatibleIds": [],
+    "ConsumptionEffects": [],
+    "GoodType": "Liquid",
+    "StockpileVisualization": "Liquid",
+    "VisibleContainer": "Barrel",
+    "ContainerColor": { "r": 0.0, "g": 0.75, "b": 0.85, "a": 1.0 },
+    "ContainerMaterial": "Materials/Goods/Badwater",
+    "CarryingAnimation": "CarryInHands",
+    "Weight": 1,
+    "GoodGroupId": "Materials",
+    "GoodOrder": 4025,
+    "Icon": "Sprites/Goods/ExtractIcon",
+    "ForceImport": false,
+    "DisplayNameLocKey": "Good.MutagenicSerum.DisplayName",
+    "PluralDisplayNameLocKey": "Good.MutagenicSerum.PluralDisplayName"
+  }
+}

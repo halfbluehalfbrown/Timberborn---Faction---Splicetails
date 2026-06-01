@@ -1,0 +1,8 @@
+{
+  "Name": "Splicetails",
+  "Version": "0.1.0.0",
+  "Id": "Timberborn.Splicetails",
+  "MinimumGameVersion": "1.0.0.0",
+  "Description": "A bio-engineering faction that genetically modifies trees to convert sunlight into energy, replacing windmill power with living solar groves.",
+  "RequiredMods": []
+}

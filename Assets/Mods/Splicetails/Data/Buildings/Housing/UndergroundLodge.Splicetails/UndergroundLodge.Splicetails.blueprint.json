@@ -1,0 +1,188 @@
+{
+  "BuildingSpec": {
+    "SelectionSoundName": "Lodge",
+    "LoopingSoundName": "",
+    "BuildingCost": [
+      {
+        "Id": "Explosives",
+        "Amount": 9
+      },
+      {
+        "Id": "Log",
+        "Amount": 200
+      },
+      {
+        "Id": "Plank",
+        "Amount": 100
+      }
+    ],
+    "ScienceCost": 1500,
+    "PlaceFinished": false,
+    "FinishableWithBeaversOnSite": false,
+    "DrawRangeBoundsOnIt": true
+  },
+  "BuildingModelSpec": {
+    "FinishedModelName": "#Finished",
+    "UnfinishedModelName": "#Unfinished",
+    "FinishedUncoveredModelName": "",
+    "UndergroundModelName": "",
+    "ConstructionModeModel": "Finished",
+    "UndergroundModelDepth": 0
+  },
+  "ProcreationHouseSpec": {},
+  "DwellingSpec": {
+    "MaxBeavers": 20,
+    "SleepEffects": [
+      {
+        "NeedId": "Sleep",
+        "PointsPerHour": 0.2,
+        "SatisfyToMaxValue": false
+      },
+      {
+        "NeedId": "Shelter",
+        "PointsPerHour": 0.3,
+        "SatisfyToMaxValue": false
+      }
+    ]
+  },
+  "EnterableSpec": {
+    "OperatingState": "Finished",
+    "LimitedCapacityFinished": false,
+    "CapacityFinished": 0,
+    "LimitedCapacityUnfinished": false,
+    "CapacityUnfinished": 0
+  },
+  "TemplateSpec": {
+    "TemplateName": "UndergroundLodge.Splicetails",
+    "BackwardCompatibleTemplateNames": [],
+    "RequiredFeatureToggle": "",
+    "DisablingFeatureToggle": ""
+  },
+  "BlockObjectSpec": {
+    "Size": {
+      "X": 1,
+      "Y": 1,
+      "Z": 1
+    },
+    "Blocks": [
+      {
+        "MatterBelow": "GroundOrStackable",
+        "Occupations": "Bottom, Top, Corners, Path, Middle",
+        "Stackable": "None",
+        "OccupyAllBelow": false,
+        "Underground": false
+      }
+    ],
+    "Entrance": {
+      "HasEntrance": true,
+      "Coordinates": {
+        "X": 0,
+        "Y": -1,
+        "Z": 0
+      }
+    },
+    "BaseZ": 0,
+    "Overridable": false,
+    "Flippable": true
+  },
+  "BlockObjectNavMeshSettingsSpec": {
+    "NoAutoWalls": false,
+    "GenerateFloorsOnStackable": true,
+    "EdgeGroups": [],
+    "UnblockedCoordinates": [],
+    "BlockedEdges": []
+  },
+  "DrivewayModelSpec": {
+    "Driveway": "NarrowLeft",
+    "HasCustomCoordinates": true,
+    "CustomCoordinates": {
+      "X": 0,
+      "Y": -1,
+      "Z": 0
+    },
+    "CustomDirection": "Down",
+    "DrivewayMode": "Unidirectional"
+  },
+  "BuildingAccessibleSpec": {
+    "LocalAccess": {
+      "X": 0.5,
+      "Y": 0.1,
+      "Z": 0.2
+    },
+    "ForceOneFinalAccess": false
+  },
+  "PlaceableBlockObjectSpec": {
+    "ToolGroupId": "Housing",
+    "ToolOrder": 25,
+    "ToolShape": "Square",
+    "Layout": "Single",
+    "CustomPivot": {
+      "HasCustomPivot": false,
+      "Coordinates": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    "CanBeAttachedToTerrainSide": false,
+    "DevModeTool": false
+  },
+  "EnterableIlluminatorSpec": {},
+  "LabeledEntitySpec": {
+    "DisplayNameLocKey": "Building.UndergroundLodge.DisplayName",
+    "DescriptionLocKey": "Building.UndergroundLodge.Description",
+    "FlavorDescriptionLocKey": "Building.UndergroundLodge.FlavorDescription",
+    "Icon": "Buildings/Housing/Lodge/LodgeIcon"
+  },
+  "ConstructionSiteProgressVisualizerSpec": {
+    "ProgressThresholds": []
+  },
+  "Children": {
+    "#Finished": {
+      "TimbermeshSpec": {
+        "Model": "Buildings/Housing/UndergroundLodge.Splicetails/Mesh/UndergroundLodge.Splicetails.Model"
+      },
+      "CollidersSpec": {
+        "BoxColliders": [
+          {
+            "Center": {
+              "X": 0.5,
+              "Y": 0.05,
+              "Z": 0.5
+            },
+            "Size": {
+              "X": 1.0,
+              "Y": 0.1,
+              "Z": 1.0
+            }
+          }
+        ],
+        "SphereColliders": [],
+        "CapsuleColliders": []
+      }
+    },
+    "#Unfinished": {
+      "Children": {
+        "ConstructionBase1x1#nested": {
+          "BlueprintPath": "ConstructionBases/ConstructionBase1x1/ConstructionBase1x1.blueprint"
+        }
+      }
+    }
+  },
+  "UndergroundLodgeSpec": {},
+  "TransputProviderSpec": {
+    "Transputs": [
+      {
+        "Coordinates": {
+          "X": 0,
+          "Y": 0,
+          "Z": 0
+        },
+        "Directions": "Down, Left, Right, Up, Bottom, Top",
+        "ReverseRotation": false
+      }
+    ],
+    "IgnoreRotation": false
+  },
+  "MechanicalConnectorTargetSpec": {}
+}
