@@ -1,0 +1,32 @@
+name: PR Checklist
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  checklist:
+    name: All PR tasks must be checked
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check all task boxes are completed
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request.body || '';
+            const unchecked = (body.match(/- \[ \]/g) || []).length;
+            const checked   = (body.match(/- \[x\]/gi) || []).length;
+            const total     = unchecked + checked;
+
+            console.log(`Tasks: ${checked}/${total} checked`);
+
+            if (unchecked > 0) {
+              core.setFailed(
+                `${unchecked} task(s) still unchecked in the PR description. ` +
+                `Check all items before requesting a merge.`
+              );
+            } else if (total === 0) {
+              console.log('No task checkboxes found — skipping.');
+            } else {
+              console.log('All tasks checked ✅');
+            }
