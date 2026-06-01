@@ -61,3 +61,19 @@ image-3.png
 validate_mod.py
 
 # NOTE: .meta files are intentionally TRACKED (do not add *.meta here)
+
+# Timberborn game DLLs and imported assets (copyrighted; comes with Timberborn installation)
+Assets/Plugins/
+Assets/Tools/
+Assets/Rendering/
+Assets/Resources/
+
+# Unity scene files (not mod-specific)
+Assets/SampleScene.unity
+Assets/SampleScene.unity.meta
+
+# Claude Code personal memory (conversation-specific)
+.claude/projects/
+
+# Local Claude settings
+.claude/settings.local.json
