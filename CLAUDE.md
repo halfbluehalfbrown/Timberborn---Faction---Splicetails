@@ -83,6 +83,9 @@ Before implementing ANY mod structure, asset paths, blueprints, or C# patterns �
 - `builder.AddDecorator<SpecType, ComponentType>()` adds a component to all entities with that spec
 - Components added this way receive DI constructor injection
 - `IAwakableComponent.Awake()` is called after construction for Unity-component setup
+- **REQUIRED: every mod-owned type used in `AddDecorator` must ALSO have `Bind<T>().AsTransient()` in `Configure()`**
+  - `AddDecorator` = WHEN to attach; `Bind<>` = HOW to create. Missing `Bind<>` → `BinditoException: No binding exists for type T` at load
+  - Vanilla Timberborn types (e.g. `LaborWorkplaceBehavior`) are pre-bound by the game — no `Bind<>` needed for those
 
 ### IInitializableEntity
 - Called after the entity is fully constructed and placed
@@ -104,6 +107,40 @@ The matching runtime component (decorator target) extends `BaseComponent`, not t
 - `AddTerrain` does NOT exist on `TerrainService` (concrete) or `ITerrainService` — it is buried on the internal `ColumnTerrainMap` API and not usable from mods. To allow crops on a building footprint, use a **1×1 building** so surrounding tiles stay as natural terrain.
 - `BlockObject.PositionedBlocks.GetAllCoordinates()` returns `IEnumerable<Vector3Int>` — iterate with this, not PositionedBlocks directly
 - `ITerrainService` (Timberborn.TerrainSystem) — read-only terrain queries (height, height below, etc.)
+
+### IPreviewValidator vs IBlockObjectValidator (verified from DLL decompilation)
+These two interfaces look similar but do DIFFERENT things:
+
+| Interface | Effect | Registration |
+|---|---|---|
+| `IPreviewValidator` | Changes preview **color** (yellow warning) — does NOT block placement | Component decorator: `AddDecorator<Spec, Validator>()` + `Bind<Validator>().AsTransient()` |
+| `IBlockObjectValidator` | Actually **blocks placement** (red preview + prevents confirm) | Global service: `MultiBind<IBlockObjectValidator>().To<Validator>().AsSingleton()` |
+
+Use `IBlockObjectValidator` whenever placement must be prevented. `IPreviewValidator` is only for UI warnings that still allow placement.
+
+`IBlockObjectValidator` signature:
+```csharp
+using Timberborn.BlockSystem;
+using UnityEngine;
+
+public class MyValidator : IBlockObjectValidator {
+    private readonly IBlockService _blockService;
+    public MyValidator(IBlockService blockService) { _blockService = blockService; }
+
+    public bool IsValid(BlockObject blockObject, out string errorMessage) {
+        if (blockObject.GetComponent<MySpec>() == null) { errorMessage = null; return true; }
+        // Check spatial constraints via IBlockService.GetFirstObjectWithComponentAt<T>(coord)
+        // Skip dx==0,dy==0 to avoid self-detection when preview is in block service
+        errorMessage = "reason";
+        return false; // blocks placement
+    }
+}
+```
+Register: `MultiBind<IBlockObjectValidator>().To<MyValidator>().AsSingleton()` — no `Bind<>` or `AddDecorator` needed.
+
+**`ReadOnlyHashSet<T>` gotcha (IPreviewValidator only):** `new ReadOnlyHashSet<T>()` compiles but leaves the internal set null → `NullReferenceException` in `GetEnumerator()` at runtime. Always use: `new HashSet<T>().AsReadOnlyHashSet()`
+
+**`IBlockService.GetFirstObjectWithComponentAt<T>(Vector3Int)`** — returns the first component of type T on any `BlockObject` at that grid coordinate (placed buildings only, not preview objects unless temporarily added). Use this to check for nearby conflicting buildings without maintaining a registry.
 
 ### Building completion vs placement
 - `IInitializableEntity.InitializeEntity()` — fires at entity **placement** (before beavers build). Use for one-time setup that should happen immediately.
@@ -195,11 +232,30 @@ The matching runtime component (decorator target) extends `BaseComponent`, not t
 | `Can't Generate Mesh, No Font Asset has been assigned.` | Unity editor bug with missing editor font | Ignore |
 | `IOException: Win32 IO returned 997` | Timberborn running during mod build (locks manifest.json) | Close game, rebuild |
 
+### Error report protocol — every reported error must produce a new test
+When a runtime or build error is reported (paste of a crash/exception), the fix is not complete until:
+1. **Root cause is identified** and documented in the relevant section of this file.
+2. **A new check is added to `validate_mod.py`** that would have caught the error before the build. If the error is only detectable at runtime (not statically), note that in a comment and add the closest static approximation that catches the same category of bug.
+
+Pattern for adding a check:
+```python
+# In validate_mod.py, inside the appropriate check block:
+if <pattern that indicates the bug>:
+    err(f"<filename>: <clear description of what's wrong and how to fix it>")
+```
+
+Examples of errors that became checks:
+- `BinditoException: No binding exists for type X` → check AddDecorator types have matching Bind<T>
+- `NullReferenceException in ReadOnlyHashSet.GetEnumerator` → check for `new ReadOnlyHashSet<T>()` empty constructor
+- `InvalidDataException: Empty line / Unnecessary comma` → check CSV format
+- `ArgumentException: Material X not found in repository` → check MaterialCollection entries
+
 ### Pre-build validation
 Run `python3 validate_mod.py` from the project root before every build. Catches:
 JSON errors, missing TemplateCollection files, Lodge.Folktails absence, missing material bundle assignments,
 block count mismatches, direction/entrance mismatches, missing timbermesh files, Meshy default material names,
-empty CSV lines, OccupyAllBelow on surface blocks, SerumDeliveryBehavior on wrong spec, MutatableReacher radius.
+empty CSV lines, OccupyAllBelow on surface blocks, SerumDeliveryBehavior on wrong spec, MutatableReacher radius,
+C# compile errors, missing Bind<T> for AddDecorator types, ReadOnlyHashSet empty constructor.
 
 ### When Adding a New Building
 1. Check vanilla blueprint for the right spec structure

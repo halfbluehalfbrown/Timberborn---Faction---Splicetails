@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(~/.dotnet/tools/ilspycmd *)",
-      "Bash(npm audit)"
+      "Bash(npm audit)",
+      "Bash(unzip -p *)",
+      "Bash(unzip -l *)"
     ]
   }
 }
