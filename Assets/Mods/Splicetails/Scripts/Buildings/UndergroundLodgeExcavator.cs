@@ -6,28 +6,36 @@ using UnityEngine;
 
 namespace Timberborn.Splicetails {
 
-    // The building is 1x1 (just the door hatch). The 8 surrounding tiles stay as
-    // natural terrain so beavers can plant crops and trees around the door.
-    // On construction complete, excavates a 3x3 area one layer below the surface
-    // to create the underground chamber.
-    public class UndergroundLodgeExcavator : BaseComponent, IFinishedStateListener {
+    // On placement (InitializeEntity): records the building's grid coordinate.
+    // On construction complete (OnEnterFinishedState): excavates the 3x3 terrain
+    // layer one level below the surface (coord.z-2).
+    public class UndergroundLodgeExcavator : BaseComponent, IInitializableEntity, IFinishedStateListener {
 
         private readonly TerrainDestroyer _terrainDestroyer;
+        private Vector3Int _doorCoord;
 
         public UndergroundLodgeExcavator(TerrainDestroyer terrainDestroyer) {
             _terrainDestroyer = terrainDestroyer;
         }
 
-        public void OnEnterFinishedState() {
+        public void InitializeEntity() {
             var blockObject = GetComponent<BlockObject>();
             if (blockObject == null) return;
-
-            // Building is 3x3. Excavate one layer below each surface tile.
-            // coord.z = surface; coord.z-1 removed by building; coord.z-2 = the chamber.
             foreach (var coord in blockObject.PositionedBlocks.GetAllCoordinates()) {
-                var excavate = new Vector3Int(coord.x, coord.y, coord.z - 2);
-                if (excavate.z >= 0)
-                    _terrainDestroyer.DestroyTerrain(excavate);
+                _doorCoord = coord;
+                break;
+            }
+        }
+
+        public void OnEnterFinishedState() {
+            // Excavate 3x3 area one layer below the surface (coord.z-2 because
+            // building completion removes coord.z terrain = first layer).
+            for (int dx = -1; dx <= 1; dx++) {
+                for (int dy = -1; dy <= 1; dy++) {
+                    var excavate = new Vector3Int(_doorCoord.x + dx, _doorCoord.y + dy, _doorCoord.z - 2);
+                    if (excavate.z >= 0)
+                        _terrainDestroyer.DestroyTerrain(excavate);
+                }
             }
         }
 
