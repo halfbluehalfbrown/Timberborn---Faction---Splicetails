@@ -1,0 +1,17 @@
+{
+  "TutorialStageSpec": {
+    "Id": "Splicetails.Mutation.BuildSpliceNursery",
+    "IntroLocKey": "Tutorial.Splicetails.Mutation.BuildSpliceNursery"
+  },
+  "Children": {
+    "Step1": {
+      "BuildingTutorialStepSpec": {
+        "TemplateNames": [
+          "SplicetailsForester.Splicetails"
+        ],
+        "OnlyFinishedBuildings": true,
+        "RequiredAmount": 1
+      }
+    }
+  }
+}

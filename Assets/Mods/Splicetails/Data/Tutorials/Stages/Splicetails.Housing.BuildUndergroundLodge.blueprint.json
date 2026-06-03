@@ -1,0 +1,17 @@
+{
+  "TutorialStageSpec": {
+    "Id": "Splicetails.Housing.BuildUndergroundLodge",
+    "IntroLocKey": "Tutorial.Splicetails.Housing.BuildUndergroundLodge"
+  },
+  "Children": {
+    "Step1": {
+      "BuildingTutorialStepSpec": {
+        "TemplateNames": [
+          "UndergroundLodge.Splicetails"
+        ],
+        "OnlyFinishedBuildings": true,
+        "RequiredAmount": 1
+      }
+    }
+  }
+}
