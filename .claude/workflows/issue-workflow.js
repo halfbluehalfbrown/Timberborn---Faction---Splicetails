@@ -135,6 +135,9 @@ if (mode === 'check-answers') {
     - [ ] Mod builds in Unity without errors
     - [ ] Tested in-game
 
+    ## Pre-merge checklist
+    - [ ] Reviewer approved
+
     🤖 Generated with [Claude Code](https://claude.ai/claude-code)"
 
     Report the PR URL.
