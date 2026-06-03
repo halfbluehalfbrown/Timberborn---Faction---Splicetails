@@ -60,71 +60,15 @@
   },
   "BlockObjectSpec": {
     "Size": {
-      "X": 3,
-      "Y": 3,
+      "X": 1,
+      "Y": 1,
       "Z": 1
     },
     "Blocks": [
       {
         "MatterBelow": "GroundOrStackable",
-        "Occupations": "Bottom, Corners, Path, Middle",
-        "Stackable": "BlockObject",
-        "OccupyAllBelow": false,
-        "Underground": false
-      },
-      {
-        "MatterBelow": "GroundOrStackable",
         "Occupations": "Bottom, Top, Corners, Path, Middle",
         "Stackable": "None",
-        "OccupyAllBelow": false,
-        "Underground": false
-      },
-      {
-        "MatterBelow": "GroundOrStackable",
-        "Occupations": "Bottom, Corners, Path, Middle",
-        "Stackable": "BlockObject",
-        "OccupyAllBelow": false,
-        "Underground": false
-      },
-      {
-        "MatterBelow": "GroundOrStackable",
-        "Occupations": "Bottom, Corners, Path, Middle",
-        "Stackable": "BlockObject",
-        "OccupyAllBelow": false,
-        "Underground": false
-      },
-      {
-        "MatterBelow": "GroundOrStackable",
-        "Occupations": "Bottom, Corners, Path, Middle",
-        "Stackable": "BlockObject",
-        "OccupyAllBelow": false,
-        "Underground": false
-      },
-      {
-        "MatterBelow": "GroundOrStackable",
-        "Occupations": "Bottom, Corners, Path, Middle",
-        "Stackable": "BlockObject",
-        "OccupyAllBelow": false,
-        "Underground": false
-      },
-      {
-        "MatterBelow": "GroundOrStackable",
-        "Occupations": "Bottom, Corners, Path, Middle",
-        "Stackable": "BlockObject",
-        "OccupyAllBelow": false,
-        "Underground": false
-      },
-      {
-        "MatterBelow": "GroundOrStackable",
-        "Occupations": "Bottom, Corners, Path, Middle",
-        "Stackable": "BlockObject",
-        "OccupyAllBelow": false,
-        "Underground": false
-      },
-      {
-        "MatterBelow": "GroundOrStackable",
-        "Occupations": "Bottom, Corners, Path, Middle",
-        "Stackable": "BlockObject",
         "OccupyAllBelow": false,
         "Underground": false
       }
@@ -132,7 +76,7 @@
     "Entrance": {
       "HasEntrance": true,
       "Coordinates": {
-        "X": 1,
+        "X": 0,
         "Y": -1,
         "Z": 0
       }
@@ -143,7 +87,7 @@
   },
   "BlockObjectNavMeshSettingsSpec": {
     "NoAutoWalls": false,
-    "GenerateFloorsOnStackable": true,
+    "GenerateFloorsOnStackable": false,
     "EdgeGroups": [],
     "UnblockedCoordinates": [],
     "BlockedEdges": []
@@ -152,7 +96,7 @@
     "Driveway": "NarrowLeft",
     "HasCustomCoordinates": true,
     "CustomCoordinates": {
-      "X": 1,
+      "X": 0,
       "Y": -1,
       "Z": 0
     },
@@ -161,9 +105,9 @@
   },
   "BuildingAccessibleSpec": {
     "LocalAccess": {
-      "X": 1.5,
+      "X": 0.5,
       "Y": 0.1,
-      "Z": 0.5
+      "Z": 0.2
     },
     "ForceOneFinalAccess": false
   },
@@ -202,14 +146,14 @@
         "BoxColliders": [
           {
             "Center": {
-              "X": 1.5,
+              "X": 0.5,
               "Y": 0.05,
-              "Z": 1.5
+              "Z": 0.5
             },
             "Size": {
-              "X": 3.0,
+              "X": 1.0,
               "Y": 0.1,
-              "Z": 3.0
+              "Z": 1.0
             }
           }
         ],
@@ -219,8 +163,8 @@
     },
     "#Unfinished": {
       "Children": {
-        "ConstructionBase3x3#nested": {
-          "BlueprintPath": "ConstructionBases/ConstructionBase3x3/ConstructionBase3x3.blueprint"
+        "ConstructionBase1x1#nested": {
+          "BlueprintPath": "ConstructionBases/ConstructionBase1x1/ConstructionBase1x1.blueprint"
         }
       }
     }
@@ -234,79 +178,7 @@
           "Y": 0,
           "Z": 0
         },
-        "Directions": "Down, Left, Bottom, Top",
-        "ReverseRotation": false
-      },
-      {
-        "Coordinates": {
-          "X": 1,
-          "Y": 0,
-          "Z": 0
-        },
-        "Directions": "Down, Bottom, Top",
-        "ReverseRotation": false
-      },
-      {
-        "Coordinates": {
-          "X": 2,
-          "Y": 0,
-          "Z": 0
-        },
-        "Directions": "Down, Right, Bottom, Top",
-        "ReverseRotation": false
-      },
-      {
-        "Coordinates": {
-          "X": 0,
-          "Y": 1,
-          "Z": 0
-        },
-        "Directions": "Left, Bottom, Top",
-        "ReverseRotation": false
-      },
-      {
-        "Coordinates": {
-          "X": 1,
-          "Y": 1,
-          "Z": 0
-        },
-        "Directions": "Bottom, Top",
-        "ReverseRotation": false
-      },
-      {
-        "Coordinates": {
-          "X": 2,
-          "Y": 1,
-          "Z": 0
-        },
-        "Directions": "Right, Bottom, Top",
-        "ReverseRotation": false
-      },
-      {
-        "Coordinates": {
-          "X": 0,
-          "Y": 2,
-          "Z": 0
-        },
-        "Directions": "Left, Up, Bottom, Top",
-        "ReverseRotation": false
-      },
-      {
-        "Coordinates": {
-          "X": 1,
-          "Y": 2,
-          "Z": 0
-        },
-        "Directions": "Up, Bottom, Top",
-        "ReverseRotation": false
-      },
-      {
-        "Coordinates": {
-          "X": 2,
-          "Y": 2,
-          "Z": 0
-        },
-        "Directions": "Up, Right, Bottom, Top",
+        "Directions": "Down, Left, Right, Up, Bottom, Top",
         "ReverseRotation": false
       }
     ],

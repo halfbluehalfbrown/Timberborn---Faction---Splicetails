@@ -1,8 +1,8 @@
 using Bindito.Core;
+using Timberborn.BlockSystem;
 using Timberborn.BottomBarSystem;
 using Timberborn.Forestry;
 using Timberborn.LaborSystem;
-using Timberborn.SingletonSystem;
 using Timberborn.TemplateInstantiation;
 using Timberborn.WorkSystem;
 
@@ -31,6 +31,7 @@ namespace Timberborn.Splicetails {
             Bind<SerumApplicatorWorkplaceBehavior>().AsTransient();
             Bind<SerumDeliveryBehavior>().AsTransient();
             Bind<UndergroundLodgeExcavator>().AsTransient();
+            MultiBind<IBlockObjectValidator>().To<UndergroundLodgeExclusionValidator>().AsSingleton();
 
             Bind<TreeMutationAreaSelectionTool>().AsSingleton();
             Bind<TreeMutationAreaUnselectionTool>().AsSingleton();

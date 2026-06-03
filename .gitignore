@@ -23,8 +23,9 @@ sysinfo.txt
 *.opendb
 *.VC.db
 
-# Visual Studio / Rider
+# Visual Studio / Rider / VS Code
 .vs/
+.vscode/
 *.csproj
 *.sln
 *.slnx
@@ -76,4 +77,5 @@ Assets/SampleScene.unity.meta
 .claude/projects/
 
 # Local Claude settings
+.claude/settings.json
 .claude/settings.local.json

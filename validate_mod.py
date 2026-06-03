@@ -61,6 +61,26 @@ def timbermesh_materials(tm_path):
 # ── check 1: Timberborn not running ──────────────────────────────────────────
 print("\nRunning Splicetails mod validation…\n")
 
+# ── C# compile check (fast, runs before Unity build) ─────────────────────────
+import subprocess as _sp
+_csproj = PROJECT / "Timberborn.Splicetails.csproj"
+if _csproj.exists():
+    result = _sp.run(
+        ["dotnet", "build", str(_csproj), "--nologo", "-v", "quiet"],
+        capture_output=True, text=True
+    )
+    if result.returncode != 0:
+        # Extract error lines from both stdout and stderr
+        for line in (result.stdout + result.stderr).splitlines():
+            if ": error " in line or "Build FAILED" in line:
+                err(f"C# compile: {line.strip()}")
+        if not errors:
+            err(f"C# compile failed (exit {result.returncode}) — run: dotnet build Timberborn.Splicetails.csproj")
+    else:
+        print("  ✅  C# scripts compile without errors")
+else:
+    warn("Timberborn.Splicetails.csproj not found — skipping C# compile check")
+
 # ── known harmless runtime messages (not caught by static analysis) ────────────
 # These appear in the game log but indicate no mod error — safe to ignore:
 #   "FMOD failed to switch back to normal output ... Cannot call this command
@@ -260,11 +280,32 @@ for p in (MOD_DATA / "Buildings").rglob("*.blueprint.json"):
 # ── check 14: C# — known bad API patterns that compile-fail ─────────────────
 for cs_file in SCRIPTS.rglob("*.cs"):
     src = cs_file.read_text()
+    # Every AddDecorator<TSpec, TComponent> for a MOD-OWNED type must have Bind<TComponent>
+    # Vanilla types (from Timberborn.* DLLs) are pre-bound by the game's own configurators.
+    # Without Bind<> for our own types, Bindito throws "No binding exists for type X".
+    decorator_types = re.findall(r'AddDecorator<[^,]+,\s*(\w+)>', src)
+    bind_types      = re.findall(r'Bind<(\w+)>\s*\(\)', src)
+    # Collect all type names defined in our Scripts folder
+    mod_types = set()
+    for cs in SCRIPTS.rglob('*.cs'):
+        for m in re.findall(r'class\s+(\w+)', cs.read_text()):
+            mod_types.add(m)
+    for dtype in decorator_types:
+        if dtype in mod_types and dtype not in bind_types:
+            err(f"{cs_file.name}: AddDecorator uses mod type '{dtype}' but no Bind<{dtype}>() — Bindito will crash at load")
     # Custom blueprint specs must be records extending ComponentSpec, not BaseComponent
     # If a class is used as a blueprint spec key (matches a JSON key in any blueprint),
     # it MUST be: public record MySpec : ComponentSpec — not BaseComponent
     if re.search(r'class\s+\w+Spec\s*:\s*BaseComponent', src):
         err(f"{cs_file.name}: *Spec class extends BaseComponent — must be 'record MySpec : ComponentSpec' for blueprint deserialization")
+    # ReadOnlyHashSet<T>() default constructor leaves internal set null → NullReferenceException
+    # Must use: new HashSet<T>().AsReadOnlyHashSet()
+    if re.search(r'new\s+ReadOnlyHashSet<[^>]+>\s*\(\s*\)', src):
+        err(f"{cs_file.name}: 'new ReadOnlyHashSet<T>()' leaves internal set null — use 'new HashSet<T>().AsReadOnlyHashSet()' instead")
+    # IPreviewValidator only changes preview color (yellow warning) — does NOT block placement.
+    # Use IBlockObjectValidator (MultiBind) to actually prevent placement.
+    if 'IPreviewValidator' in src and 'IBlockObjectValidator' not in src:
+        err(f"{cs_file.name}: implements IPreviewValidator but NOT IBlockObjectValidator — IPreviewValidator only shows warning color, it does NOT block placement; use IBlockObjectValidator + MultiBind to block")
     # ITerrainService.RemoveTerrain doesn't exist — use TerrainDestroyer.DestroyTerrain
     if "ITerrainService" in src and "RemoveTerrain" in src:
         err(f"{cs_file.name}: ITerrainService has no RemoveTerrain — use TerrainDestroyer.DestroyTerrain instead")
