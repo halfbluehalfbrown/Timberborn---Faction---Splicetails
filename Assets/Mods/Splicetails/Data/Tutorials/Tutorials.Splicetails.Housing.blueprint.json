@@ -1,0 +1,15 @@
+{
+  "TutorialSpec": {
+    "Id": "Splicetails.Housing",
+    "NameLocKey": "Tutorial.Splicetails.Housing",
+    "RequiredTutorialIds": [
+      "Storage"
+    ],
+    "SkipIfTutorialFinished": "Housing",
+    "SortOrder": 65,
+    "Stages": [
+      "Splicetails.Housing.BuildLodge",
+      "Splicetails.Housing.BuildUndergroundLodge"
+    ]
+  }
+}

@@ -14,19 +14,26 @@ jobs:
         with:
           script: |
             const body = context.payload.pull_request.body || '';
-            const unchecked = (body.match(/- \[ \]/g) || []).length;
-            const checked   = (body.match(/- \[x\]/gi) || []).length;
+
+            // Only enforce checkboxes under a "## Pre-merge checklist" section.
+            // Test plan items (under "## Test plan") are informational and must
+            // not block merges — they are checked off by the reviewer in-game.
+            const sectionMatch = body.match(/##\s*Pre-merge checklist\b([\s\S]*?)(?=\n##\s|\s*$)/i);
+            const section = sectionMatch ? sectionMatch[1] : '';
+
+            const unchecked = (section.match(/- \[ \]/g) || []).length;
+            const checked   = (section.match(/- \[x\]/gi) || []).length;
             const total     = unchecked + checked;
 
-            console.log(`Tasks: ${checked}/${total} checked`);
+            console.log(`Pre-merge checklist tasks: ${checked}/${total} checked`);
 
             if (unchecked > 0) {
               core.setFailed(
-                `${unchecked} task(s) still unchecked in the PR description. ` +
-                `Check all items before requesting a merge.`
+                `${unchecked} pre-merge task(s) still unchecked. ` +
+                `Check all items in the "Pre-merge checklist" section before merging.`
               );
             } else if (total === 0) {
-              console.log('No task checkboxes found — skipping.');
+              console.log('No pre-merge checklist found — skipping.');
             } else {
-              console.log('All tasks checked ✅');
+              console.log('All pre-merge tasks checked ✅');
             }
