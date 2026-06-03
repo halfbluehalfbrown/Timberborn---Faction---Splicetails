@@ -1,0 +1,16 @@
+{
+  "TutorialSpec": {
+    "Id": "Splicetails.Mutation",
+    "NameLocKey": "Tutorial.Splicetails.Mutation",
+    "RequiredTutorialIds": [
+      "Science"
+    ],
+    "SkipIfTutorialFinished": "",
+    "SortOrder": 110,
+    "Stages": [
+      "Splicetails.Mutation.BuildSplicer",
+      "Splicetails.Mutation.BuildGeneLab",
+      "Splicetails.Mutation.BuildSpliceNursery"
+    ]
+  }
+}
