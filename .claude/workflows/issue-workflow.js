@@ -40,6 +40,27 @@ const ISSUES_SCHEMA = {
   required: ['issues']
 }
 
+const COMMENTS_SCHEMA = {
+  type: 'object',
+  properties: {
+    number: { type: 'number' },
+    title:  { type: 'string' },
+    body:   { type: 'string' },
+    comments: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          author: { type: 'object', properties: { login: { type: 'string' } } },
+          authorAssociation: { type: 'string' },
+          body: { type: 'string' }
+        }
+      }
+    }
+  },
+  required: ['number', 'title', 'comments']
+}
+
 const mode        = args?.mode ?? 'find-ready'
 const issueNumber = args?.issue
 const PROJECT     = '/Users/palmer/Documents/Claude/Projects/Timberborn - Derivative Faction'
@@ -62,14 +83,15 @@ if (mode === 'find-ready') {
     { schema: ISSUES_SCHEMA, label: 'find-ready-issues' }
   )
 
-  if (!result.issues.length) {
+  const readyCount = result.issues.length
+  if (!readyCount) {
     log('No issues labeled "ready" found.')
-    return { found: 0 }
+  } else {
+    log(`Found ${readyCount} ready issue(s)`)
   }
-  log(`Found ${result.issues.length} ready issue(s)`)
 
   phase('Branch & Questions')
-  const processed = await parallel(result.issues.map(issue => async () => {
+  const processed = readyCount ? await parallel(result.issues.map(issue => async () => {
     const slug   = issue.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40)
     const branch = `issue/${issue.number}-${slug}`
 
@@ -89,9 +111,113 @@ if (mode === 'find-ready') {
 
       Report: branch created, questions posted (or "no questions"), labels updated.
     `, { label: `process-${issue.number}` })
-  }))
+  })) : []
 
-  return { processed: processed.filter(Boolean).length }
+  // ── Scan in-progress issues for owner replies to bot questions ──────────────
+  log('Scanning in-progress issues for answered questions...')
+  const inProgressResult = await agent(
+    `List all open GitHub issues in ${REPO} that have the label "in-progress".
+     Run: gh issue list --repo ${REPO} --label in-progress --json number,title,body,labels
+     Return the parsed list.`,
+    { schema: ISSUES_SCHEMA, label: 'find-in-progress-issues' }
+  )
+
+  const answeredIssues = []
+  if (inProgressResult.issues.length) {
+    const commentResults = await parallel(inProgressResult.issues.map(issue => async () => {
+      const data = await agent(
+        `Fetch issue #${issue.number} and its comments from ${REPO}.
+         Run: gh issue view ${issue.number} --repo ${REPO} --comments --json number,title,body,comments
+         Return the parsed JSON.`,
+        { schema: COMMENTS_SCHEMA, label: `comments-${issue.number}` }
+      )
+      return { issue, data }
+    }))
+
+    for (const { issue, data } of commentResults.filter(Boolean)) {
+      const comments = data.comments ?? []
+      // Detect: at least one non-owner comment (bot/Claude) followed by at least one OWNER comment
+      let sawBotComment = false
+      let ownerRepliedAfterBot = false
+      for (const c of comments) {
+        const assoc = (c.authorAssociation ?? '').toUpperCase()
+        if (assoc !== 'OWNER') {
+          sawBotComment = true
+        } else if (sawBotComment && assoc === 'OWNER') {
+          ownerRepliedAfterBot = true
+          break
+        }
+      }
+      if (ownerRepliedAfterBot) {
+        log(`Issue #${issue.number} has owner replies to bot questions — queuing for implementation`)
+        answeredIssues.push({ issue, data })
+      }
+    }
+  }
+
+  if (answeredIssues.length) {
+    log(`Found ${answeredIssues.length} answered in-progress issue(s) — implementing now`)
+    phase('Implement')
+    await parallel(answeredIssues.map(({ issue, data }) => async () => {
+      const issueNum = issue.number
+      const issueTitle = issue.title
+      const commentsText = (data.comments ?? []).map(c => `[${c.authorAssociation}] ${c.body}`).join('\n\n')
+
+      await agent(`
+        Implement the changes for issue #${issueNum}: "${issueTitle}"
+
+        Original issue body:
+        ${data.body}
+
+        Comments (including owner answers to questions):
+        ${commentsText}
+
+        Project directory: ${PROJECT}
+
+        Steps:
+        1. cd "${PROJECT}" && git fetch origin
+        2. Check out the existing branch: git checkout $(git branch -a | grep -o 'issue/${issueNum}-[^[:space:]]*' | head -1 | sed 's|remotes/origin/||')
+           If no local branch matches, use: git checkout --track origin/$(git branch -r | grep -o 'issue/${issueNum}-[^[:space:]]*' | head -1)
+        3. Implement all required changes based on the issue and answers.
+        4. python3 validate_mod.py
+        5. git add -A && git commit -m "Implement #${issueNum}: ${issueTitle}" && git push
+        Report: branch name used, changes made, validation result, commit hash.
+      `, { label: `implement-answered-${issueNum}` })
+    }))
+
+    phase('Pull Request')
+    await parallel(answeredIssues.map(({ issue }) => async () => {
+      const issueNum = issue.number
+      await agent(`
+        Create a PR for issue #${issueNum} in ${REPO} if one does not already exist.
+
+        1. Check: gh pr list --repo ${REPO} --head $(git -C "${PROJECT}" branch -a | grep -o 'issue/${issueNum}-[^[:space:]]*' | head -1 | sed 's|remotes/origin/||') --json number --jq '.[0].number'
+           If a PR number is returned, skip creation and just report the existing PR URL.
+        2. If no PR exists:
+           gh pr create --repo ${REPO} \
+             --title "Fix #${issueNum}: ${issue.title}" \
+             --body "## Summary
+        [Summarise the implementation based on the issue and changes made]
+
+        Closes #${issueNum}
+
+        ## Test plan
+        - [ ] python3 validate_mod.py passes
+        - [ ] Mod builds in Unity without errors
+        - [ ] Tested in-game
+
+        ## Pre-merge checklist
+        - [ ] Reviewer approved
+
+        🤖 Generated with [Claude Code](https://claude.ai/claude-code)"
+        3. Report the PR URL.
+      `, { label: `pr-answered-${issueNum}` })
+    }))
+  } else {
+    log('No in-progress issues with owner replies found.')
+  }
+
+  return { processed: processed.filter(Boolean).length, answeredAndImplemented: answeredIssues.length }
 }
 
 // ── CHECK ANSWERS ─────────────────────────────────────────────────────────────
