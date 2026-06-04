@@ -1,0 +1,14 @@
+{
+  "Children": {
+    "Step1": {
+      "BuildingTutorialStepSpec": {
+        "TemplateNames#remove": [
+          "Lodge.Folktails"
+        ],
+        "TemplateNames#append": [
+          "Lodge.Splicetails"
+        ]
+      }
+    }
+  }
+}
