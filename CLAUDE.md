@@ -55,6 +55,8 @@ Before implementing ANY mod structure, asset paths, blueprints, or C# patterns �
 ### Building Blueprints
 - `ConstructionSiteProgressVisualizerSpec.ProgressThresholds` must have exactly (N construction stages) entries — if you remove all construction stages, set this to `[]`
 - When replacing a vanilla building, add the original template name to `BackwardCompatibleTemplateNames` to avoid breaking tutorial steps
+- **`BackwardCompatibleTemplateNames` is required even if the vanilla building is removed from the TemplateCollection.** `BuildingTutorialStepDeserializer.Create` calls `BuildingService.GetBuildingTemplate(name)` on every `TemplateNames` entry in every tutorial stage loaded at startup — including vanilla stages like the Folktails Housing tutorial. If any name can't be resolved, it throws `ArgumentException: Building not found: Lodge.Folktails`. Removing a building from the TemplateCollection only stops it from being buildable; you still need `BackwardCompatibleTemplateNames` so the tutorial system can resolve the old name to the replacement building.
+- **Removing a Folktails building from TemplateCollection = not directly buildable when playing as Splicetails.** The `BackwardCompatibleTemplateNames` entry is a separate concern — it keeps the name resolvable for tutorial lookup without making the building available to players.
 - `SimpleInputInventorySpec` does NOT exist — use `ManufactorySpec` for input inventories
 
 ---

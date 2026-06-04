@@ -116,14 +116,25 @@ if tc:
     if not missing:
         print(f"  ✅  All {len(custom_bps)} custom TemplateCollection files exist")
 
-    # ── check 4: Lodge.Folktails must NOT be present (removed in issue #13) ────
-    # The Splicetails tutorial now references Lodge.Splicetails directly via
-    # Splicetails.Housing.BuildLodge — BackwardCompatibleTemplateNames no longer needed.
+    # ── check 4: Lodge.Folktails must NOT be in TemplateCollection (not buildable) ──
+    # BUT Lodge.Splicetails MUST keep BackwardCompatibleTemplateNames: ["Lodge.Folktails"]
+    # because BuildingTutorialStepDeserializer calls GetBuildingTemplate on every
+    # TemplateNames entry in every tutorial stage at startup (including vanilla Folktails
+    # stages). If Lodge.Folktails can't resolve, it throws ArgumentException at load time.
     lodge_ref = "Buildings/Housing/Lodge/Lodge.Folktails.blueprint"
     if lodge_ref in tc["TemplateCollectionSpec"]["Blueprints"]:
-        err("Lodge.Folktails is still in TemplateCollection — it was removed in issue #13 (tutorial now references Lodge.Splicetails directly)")
+        err("Lodge.Folktails is still in TemplateCollection — remove it so it is not buildable (but keep BackwardCompatibleTemplateNames on Lodge.Splicetails)")
     else:
         print("  ✅  Lodge.Folktails correctly absent from TemplateCollection")
+
+    # ── check 4a: Lodge.Splicetails must keep Lodge.Folktails in BackwardCompatibleTemplateNames ──
+    lodge_bp_path = MOD_DATA / "Buildings/Housing/Lodge.Splicetails/Lodge.Splicetails.blueprint.json"
+    if lodge_bp_path.exists():
+        lodge_bp = load_json(lodge_bp_path)
+        if lodge_bp:
+            compat = lodge_bp.get("TemplateSpec", {}).get("BackwardCompatibleTemplateNames", [])
+            if "Lodge.Folktails" not in compat:
+                err("Lodge.Splicetails.blueprint.json: BackwardCompatibleTemplateNames must include 'Lodge.Folktails' — the vanilla tutorial system calls GetBuildingTemplate('Lodge.Folktails') at startup and crashes if it can't resolve")
 
     # ── check 4b: Splicetails Housing tutorial stage must reference Lodge.Splicetails ──
     build_lodge_path = MOD_DATA / "Tutorials/Stages/Splicetails.Housing.BuildLodge.blueprint.json"

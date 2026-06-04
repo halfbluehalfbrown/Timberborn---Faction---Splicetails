@@ -46,7 +46,7 @@
   },
   "TemplateSpec": {
     "TemplateName": "Lodge.Splicetails",
-    "BackwardCompatibleTemplateNames": [],
+    "BackwardCompatibleTemplateNames": ["Lodge.Folktails"],
     "RequiredFeatureToggle": "",
     "DisablingFeatureToggle": ""
   },
