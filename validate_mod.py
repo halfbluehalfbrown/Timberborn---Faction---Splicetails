@@ -116,25 +116,18 @@ if tc:
     if not missing:
         print(f"  ✅  All {len(custom_bps)} custom TemplateCollection files exist")
 
-    # ── check 4: Lodge.Folktails must NOT be in TemplateCollection (not buildable) ──
-    # BUT Lodge.Splicetails MUST keep BackwardCompatibleTemplateNames: ["Lodge.Folktails"]
-    # because BuildingTutorialStepDeserializer calls GetBuildingTemplate on every
-    # TemplateNames entry in every tutorial stage at startup (including vanilla Folktails
-    # stages). If Lodge.Folktails can't resolve, it throws ArgumentException at load time.
+    # ── check 4: Lodge.Folktails MUST stay in TemplateCollection ─────────────────
+    # BuildingTutorialStepDeserializer.Create calls BuildingService.GetBuildingTemplate
+    # on every TemplateNames entry in every tutorial stage loaded at startup — including
+    # the vanilla Folktails Housing tutorial which references Lodge.Folktails.
+    # GetBuildingTemplate looks up by TemplateName only (not BackwardCompatibleTemplateNames).
+    # If Lodge.Folktails is absent from TemplateCollection, the game crashes:
+    #   ArgumentException: Building not found: Lodge.Folktails
     lodge_ref = "Buildings/Housing/Lodge/Lodge.Folktails.blueprint"
-    if lodge_ref in tc["TemplateCollectionSpec"]["Blueprints"]:
-        err("Lodge.Folktails is still in TemplateCollection — remove it so it is not buildable (but keep BackwardCompatibleTemplateNames on Lodge.Splicetails)")
+    if lodge_ref not in tc["TemplateCollectionSpec"]["Blueprints"]:
+        err("Lodge.Folktails must remain in TemplateCollection — BuildingService.GetBuildingTemplate requires it to resolve the vanilla Housing tutorial step at startup")
     else:
-        print("  ✅  Lodge.Folktails correctly absent from TemplateCollection")
-
-    # ── check 4a: Lodge.Splicetails must keep Lodge.Folktails in BackwardCompatibleTemplateNames ──
-    lodge_bp_path = MOD_DATA / "Buildings/Housing/Lodge.Splicetails/Lodge.Splicetails.blueprint.json"
-    if lodge_bp_path.exists():
-        lodge_bp = load_json(lodge_bp_path)
-        if lodge_bp:
-            compat = lodge_bp.get("TemplateSpec", {}).get("BackwardCompatibleTemplateNames", [])
-            if "Lodge.Folktails" not in compat:
-                err("Lodge.Splicetails.blueprint.json: BackwardCompatibleTemplateNames must include 'Lodge.Folktails' — the vanilla tutorial system calls GetBuildingTemplate('Lodge.Folktails') at startup and crashes if it can't resolve")
+        print("  ✅  Lodge.Folktails present in TemplateCollection (required for tutorial resolution)")
 
     # ── check 4b: Splicetails Housing tutorial stage must reference Lodge.Splicetails ──
     build_lodge_path = MOD_DATA / "Tutorials/Stages/Splicetails.Housing.BuildLodge.blueprint.json"
