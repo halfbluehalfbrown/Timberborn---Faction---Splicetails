@@ -132,7 +132,7 @@
     "DisplayNameLocKey": "Building.UndergroundLodge.DisplayName",
     "DescriptionLocKey": "Building.UndergroundLodge.Description",
     "FlavorDescriptionLocKey": "Building.UndergroundLodge.FlavorDescription",
-    "Icon": "Buildings/Housing/Lodge/LodgeIcon"
+    "Icon": "Buildings/Housing/UndergroundLodge.Splicetails/UndergroundLodgeIcon.Splicetails"
   },
   "ConstructionSiteProgressVisualizerSpec": {
     "ProgressThresholds": []
