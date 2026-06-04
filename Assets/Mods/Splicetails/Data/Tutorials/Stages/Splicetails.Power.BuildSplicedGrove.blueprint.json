@@ -1,0 +1,17 @@
+{
+  "TutorialStageSpec": {
+    "Id": "Splicetails.Power.BuildSplicedGrove",
+    "IntroLocKey": "Tutorial.Splicetails.Power.BuildSplicedGrove"
+  },
+  "Children": {
+    "Step1": {
+      "BuildingTutorialStepSpec": {
+        "TemplateNames": [
+          "WindTurbine.Splicetails"
+        ],
+        "OnlyFinishedBuildings": true,
+        "RequiredAmount": 1
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "TutorialSpec": {
+    "Id": "Splicetails.Power",
+    "NameLocKey": "Tutorial.Splicetails.Power",
+    "RequiredTutorialIds": [
+      "Storage"
+    ],
+    "SkipIfTutorialFinished": "PowerAndPlanks",
+    "SortOrder": 75,
+    "Stages": [
+      "Splicetails.Power.BuildSplicedGrove"
+    ]
+  }
+}

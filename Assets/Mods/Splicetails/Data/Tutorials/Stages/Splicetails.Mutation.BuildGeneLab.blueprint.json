@@ -1,0 +1,17 @@
+{
+  "TutorialStageSpec": {
+    "Id": "Splicetails.Mutation.BuildGeneLab",
+    "IntroLocKey": "Tutorial.Splicetails.Mutation.BuildGeneLab"
+  },
+  "Children": {
+    "Step1": {
+      "BuildingTutorialStepSpec": {
+        "TemplateNames": [
+          "GeneLab.Splicetails"
+        ],
+        "OnlyFinishedBuildings": true,
+        "RequiredAmount": 1
+      }
+    }
+  }
+}
