@@ -58,6 +58,13 @@ Before implementing ANY mod structure, asset paths, blueprints, or C# patterns �
 - **`BackwardCompatibleTemplateNames` does NOT affect `BuildingService.GetBuildingTemplate`.** That method looks up by `TemplateName` only. `BackwardCompatibleTemplateNames` is only for loading saved games where a building was persisted under its old name.
 - **`Lodge.Folktails` MUST stay in the Splicetails TemplateCollection.** `BuildingTutorialStepDeserializer.Create` calls `BuildingService.GetBuildingTemplate(name)` on every `TemplateNames` entry in every tutorial stage at startup — including the vanilla Folktails Housing tutorial. If `Lodge.Folktails` isn't in the TemplateCollection, the game crashes with `ArgumentException: Building not found: Lodge.Folktails`. There is no workaround short of overriding the vanilla tutorial stage.
 - `SimpleInputInventorySpec` does NOT exist — use `ManufactorySpec` for input inventories
+- **Custom building icons (`LabeledEntitySpec.Icon`) require three files** (see ShantySpeaker example in timberborn-modding-main):
+  1. `BuildingNameIcon.png` — the PNG, placed in `Data/Buildings/.../`
+  2. `BuildingNameIcon.png.meta` — Unity meta file (textureType: 8, spriteMode: 1, alphaIsTransparency: 1)
+  3. `BuildingNameIcon.png.meta.json` — Timberborn sprite registration: `{ "isSprite": true }`
+  4. `BuildingNameIcon.png.meta.json.meta` — Unity meta for the above JSON
+  - Icon path in blueprint: `Buildings/.../BuildingNameIcon` (no extension, no faction suffix in filename)
+  - **Never put `.FactionName` in the icon filename.** `DecalService.GetValidatedDecal` splits the filename on `.` and CamelCase-splits the last segment — `UndergroundLodgeIcon.Splicetails` → key `Tails` → `KeyNotFoundException: The given key 'Tails'`
 
 ---
 
