@@ -116,20 +116,39 @@ if tc:
     if not missing:
         print(f"  ✅  All {len(custom_bps)} custom TemplateCollection files exist")
 
-    # ── check 4: Lodge.Folktails MUST stay in TemplateCollection ─────────────────
-    # BuildingTutorialStepDeserializer.Create calls BuildingService.GetBuildingTemplate
-    # on every TemplateNames entry in every tutorial stage loaded at startup — including
-    # the vanilla Folktails Housing tutorial which references Lodge.Folktails.
-    # GetBuildingTemplate looks up by TemplateName only (not BackwardCompatibleTemplateNames).
-    # If Lodge.Folktails is absent from TemplateCollection, the game crashes:
-    #   ArgumentException: Building not found: Lodge.Folktails
+    # ── check 4: Lodge.Folktails must NOT be in TemplateCollection ───────────────
+    # Issue #15: the vanilla Housing tutorial stage (Housing.BuildLodges) is now
+    # overridden at Data/Tutorials/Stages/Housing.BuildLodges.blueprint.json to
+    # replace Lodge.Folktails with Lodge.Splicetails in TemplateNames.
+    # Lodge.Folktails no longer needs to be in TemplateCollection — keeping it
+    # would cause it to appear as a (hidden via DevModeTool) buildable for Splicetails.
     lodge_ref = "Buildings/Housing/Lodge/Lodge.Folktails.blueprint"
-    if lodge_ref not in tc["TemplateCollectionSpec"]["Blueprints"]:
-        err("Lodge.Folktails must remain in TemplateCollection — BuildingService.GetBuildingTemplate requires it to resolve the vanilla Housing tutorial step at startup")
+    if lodge_ref in tc["TemplateCollectionSpec"]["Blueprints"]:
+        err("Lodge.Folktails must NOT be in TemplateCollection — issue #15 overrides the vanilla Housing tutorial stage instead; remove the workaround entry")
     else:
-        print("  ✅  Lodge.Folktails present in TemplateCollection (required for tutorial resolution)")
+        print("  ✅  Lodge.Folktails not in TemplateCollection (tutorial handled by Housing.BuildLodges override)")
 
-    # ── check 4b: Splicetails Housing tutorial stage must reference Lodge.Splicetails ──
+    # ── check 4b: Housing.BuildLodges override must replace Lodge.Folktails with Lodge.Splicetails ──
+    # The vanilla Housing.BuildLodges tutorial stage references Lodge.Folktails.
+    # Our mod override patches it to use Lodge.Splicetails instead.
+    housing_override_path = MOD_DATA / "Tutorials/Stages/Housing.BuildLodges.blueprint.json"
+    if not housing_override_path.exists():
+        err("Housing.BuildLodges.blueprint.json override missing — create Data/Tutorials/Stages/Housing.BuildLodges.blueprint.json to replace Lodge.Folktails with Lodge.Splicetails in the vanilla tutorial")
+    else:
+        housing_override = load_json(housing_override_path)
+        if housing_override:
+            step1 = housing_override.get("Children", {}).get("Step1", {})
+            spec = step1.get("BuildingTutorialStepSpec", {})
+            appended = spec.get("TemplateNames#append", [])
+            removed = spec.get("TemplateNames#remove", [])
+            if "Lodge.Splicetails" not in appended:
+                err("Housing.BuildLodges override must append Lodge.Splicetails to TemplateNames — 'TemplateNames#append': [\"Lodge.Splicetails\"] missing")
+            elif "Lodge.Folktails" not in removed:
+                err("Housing.BuildLodges override must remove Lodge.Folktails from TemplateNames — 'TemplateNames#remove': [\"Lodge.Folktails\"] missing")
+            else:
+                print("  ✅  Housing.BuildLodges override correctly replaces Lodge.Folktails with Lodge.Splicetails")
+
+    # ── check 4c: Splicetails Housing tutorial stage must reference Lodge.Splicetails ──
     build_lodge_path = MOD_DATA / "Tutorials/Stages/Splicetails.Housing.BuildLodge.blueprint.json"
     if build_lodge_path.exists():
         build_lodge = load_json(build_lodge_path)
