@@ -116,12 +116,30 @@ if tc:
     if not missing:
         print(f"  ✅  All {len(custom_bps)} custom TemplateCollection files exist")
 
-    # ── check 4: Lodge.Folktails must be present (tutorial hard-codes it) ────
+    # ── check 4: Lodge.Folktails must NOT be present (removed in issue #13) ────
+    # The Splicetails tutorial now references Lodge.Splicetails directly via
+    # Splicetails.Housing.BuildLodge — BackwardCompatibleTemplateNames no longer needed.
     lodge_ref = "Buildings/Housing/Lodge/Lodge.Folktails.blueprint"
-    if lodge_ref not in tc["TemplateCollectionSpec"]["Blueprints"]:
-        err("Lodge.Folktails missing from TemplateCollection — game will crash at load (tutorial looks it up by name)")
+    if lodge_ref in tc["TemplateCollectionSpec"]["Blueprints"]:
+        err("Lodge.Folktails is still in TemplateCollection — it was removed in issue #13 (tutorial now references Lodge.Splicetails directly)")
     else:
-        print("  ✅  Lodge.Folktails present in TemplateCollection")
+        print("  ✅  Lodge.Folktails correctly absent from TemplateCollection")
+
+    # ── check 4b: Splicetails Housing tutorial stage must reference Lodge.Splicetails ──
+    build_lodge_path = MOD_DATA / "Tutorials/Stages/Splicetails.Housing.BuildLodge.blueprint.json"
+    if build_lodge_path.exists():
+        build_lodge = load_json(build_lodge_path)
+        if build_lodge:
+            step1 = build_lodge.get("Children", {}).get("Step1", {})
+            template_names = step1.get("BuildingTutorialStepSpec", {}).get("TemplateNames", [])
+            if "Lodge.Splicetails" not in template_names:
+                err("Splicetails.Housing.BuildLodge tutorial step must reference Lodge.Splicetails — found: " + str(template_names))
+            elif "Lodge.Folktails" in template_names:
+                err("Splicetails.Housing.BuildLodge still references Lodge.Folktails — update to Lodge.Splicetails only")
+            else:
+                print("  ✅  BuildLodge tutorial stage references Lodge.Splicetails correctly")
+    else:
+        err("Splicetails.Housing.BuildLodge.blueprint.json missing — required for Splicetails housing tutorial")
 
 # ── check 5: MaterialCollection entries → .mat + bundle assignment ────────────
 mc_path = MOD_DATA / "Specifications/MaterialCollections/MaterialCollection.Splicetails.blueprint.json"
