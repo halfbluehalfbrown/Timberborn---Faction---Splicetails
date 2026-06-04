@@ -116,12 +116,34 @@ if tc:
     if not missing:
         print(f"  ✅  All {len(custom_bps)} custom TemplateCollection files exist")
 
-    # ── check 4: Lodge.Folktails must be present (tutorial hard-codes it) ────
+    # ── check 4: Lodge.Folktails MUST stay in TemplateCollection ─────────────────
+    # BuildingTutorialStepDeserializer.Create calls BuildingService.GetBuildingTemplate
+    # on every TemplateNames entry in every tutorial stage loaded at startup — including
+    # the vanilla Folktails Housing tutorial which references Lodge.Folktails.
+    # GetBuildingTemplate looks up by TemplateName only (not BackwardCompatibleTemplateNames).
+    # If Lodge.Folktails is absent from TemplateCollection, the game crashes:
+    #   ArgumentException: Building not found: Lodge.Folktails
     lodge_ref = "Buildings/Housing/Lodge/Lodge.Folktails.blueprint"
     if lodge_ref not in tc["TemplateCollectionSpec"]["Blueprints"]:
-        err("Lodge.Folktails missing from TemplateCollection — game will crash at load (tutorial looks it up by name)")
+        err("Lodge.Folktails must remain in TemplateCollection — BuildingService.GetBuildingTemplate requires it to resolve the vanilla Housing tutorial step at startup")
     else:
-        print("  ✅  Lodge.Folktails present in TemplateCollection")
+        print("  ✅  Lodge.Folktails present in TemplateCollection (required for tutorial resolution)")
+
+    # ── check 4b: Splicetails Housing tutorial stage must reference Lodge.Splicetails ──
+    build_lodge_path = MOD_DATA / "Tutorials/Stages/Splicetails.Housing.BuildLodge.blueprint.json"
+    if build_lodge_path.exists():
+        build_lodge = load_json(build_lodge_path)
+        if build_lodge:
+            step1 = build_lodge.get("Children", {}).get("Step1", {})
+            template_names = step1.get("BuildingTutorialStepSpec", {}).get("TemplateNames", [])
+            if "Lodge.Splicetails" not in template_names:
+                err("Splicetails.Housing.BuildLodge tutorial step must reference Lodge.Splicetails — found: " + str(template_names))
+            elif "Lodge.Folktails" in template_names:
+                err("Splicetails.Housing.BuildLodge still references Lodge.Folktails — update to Lodge.Splicetails only")
+            else:
+                print("  ✅  BuildLodge tutorial stage references Lodge.Splicetails correctly")
+    else:
+        err("Splicetails.Housing.BuildLodge.blueprint.json missing — required for Splicetails housing tutorial")
 
 # ── check 5: MaterialCollection entries → .mat + bundle assignment ────────────
 mc_path = MOD_DATA / "Specifications/MaterialCollections/MaterialCollection.Splicetails.blueprint.json"
