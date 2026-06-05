@@ -5,10 +5,6 @@ using Timberborn.ToolSystem;
 
 namespace Timberborn.Splicetails {
 
-    // Draws persistent teal ground tiles over all cells marked for serum application.
-    // Tiles are visible only while the TreeCutting tool group is open, matching the
-    // vanilla tree-cutting area visualizer pattern. A deferred-redraw flag ensures
-    // changes made while the group is closed are applied immediately on re-open.
     public class TreeMutationAreaVisualizer : ILoadableSingleton {
 
         private static readonly string TreeCuttingGroupId = "TreeCutting";
@@ -21,7 +17,6 @@ namespace Timberborn.Splicetails {
 
         private AreaTileDrawer _areaTileDrawer;
         private bool _groupOpen;
-        private bool _updateAreaOnEnter;
 
         public TreeMutationAreaVisualizer(TreeMutationArea mutationArea,
                                           AreaTileDrawerFactory areaTileDrawerFactory,
@@ -45,7 +40,6 @@ namespace Timberborn.Splicetails {
             if (e.ToolGroup == null || e.ToolGroup.Id != TreeCuttingGroupId)
                 return;
             _groupOpen = true;
-            _updateAreaOnEnter = false;
             Redraw();
         }
 
@@ -59,11 +53,8 @@ namespace Timberborn.Splicetails {
 
         [OnEvent]
         public void OnMutationAreaChanged(TreeMutationAreaChangedEvent _) {
-            if (_groupOpen) {
+            if (_groupOpen)
                 Redraw();
-            } else {
-                _updateAreaOnEnter = true;
-            }
         }
 
         private void Redraw() {
