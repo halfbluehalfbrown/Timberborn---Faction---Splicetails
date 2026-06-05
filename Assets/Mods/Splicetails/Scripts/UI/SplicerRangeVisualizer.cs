@@ -64,6 +64,7 @@ namespace Timberborn.Splicetails {
 
         private void Redraw() {
             _areaTileDrawer.UpdateArea(_rangeService.GetRangeTiles());
+            _areaTileDrawer.ShowAllTiles();
         }
     }
 }
