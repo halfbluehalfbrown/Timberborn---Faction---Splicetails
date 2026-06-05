@@ -7,7 +7,7 @@
     "StockpileVisualization": "Liquid",
     "VisibleContainer": "Barrel",
     "ContainerColor": { "r": 0.02352941, "g": 0.58039216, "b": 0.58039216, "a": 1.0 },
-    "ContainerMaterial": "Materials/Goods/Catalyst",
+    "ContainerMaterial": "Materials/Goods/Water",
     "CarryingAnimation": "CarryInHands",
     "Weight": 1,
     "GoodGroupId": "Materials",
