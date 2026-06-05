@@ -17,6 +17,7 @@ namespace Timberborn.Splicetails {
 
         private AreaTileDrawer _areaTileDrawer;
         private bool _groupOpen;
+        private bool _updateAreaOnEnter;
 
         public TreeMutationAreaVisualizer(TreeMutationArea mutationArea,
                                           AreaTileDrawerFactory areaTileDrawerFactory,
@@ -31,7 +32,7 @@ namespace Timberborn.Splicetails {
         public void Load() {
             var parent = _rootObjectProvider.CreateRootObject("TreeMutationAreaVisualizer");
             _areaTileDrawer = _areaTileDrawerFactory.Create(TealTileColor, parent);
-            _areaTileDrawer.HideAllTiles();
+            _updateAreaOnEnter = true;
             _eventBus.Register(this);
         }
 
@@ -40,7 +41,11 @@ namespace Timberborn.Splicetails {
             if (e.ToolGroup == null || e.ToolGroup.Id != TreeCuttingGroupId)
                 return;
             _groupOpen = true;
-            Redraw();
+            if (_updateAreaOnEnter) {
+                _updateAreaOnEnter = false;
+                _areaTileDrawer.UpdateArea(_mutationArea.Area);
+            }
+            _areaTileDrawer.ShowAllTiles();
         }
 
         [OnEvent]
@@ -53,12 +58,12 @@ namespace Timberborn.Splicetails {
 
         [OnEvent]
         public void OnMutationAreaChanged(TreeMutationAreaChangedEvent _) {
-            if (_groupOpen)
-                Redraw();
-        }
-
-        private void Redraw() {
-            _areaTileDrawer.UpdateArea(_mutationArea.Area);
+            if (_groupOpen) {
+                _areaTileDrawer.UpdateArea(_mutationArea.Area);
+                _areaTileDrawer.ShowAllTiles();
+            } else {
+                _updateAreaOnEnter = true;
+            }
         }
     }
 }
