@@ -21,7 +21,6 @@ namespace Timberborn.Splicetails {
         private static readonly Color PreviewColor = new Color(1.0f, 0.15f, 0.15f, 0.6f);
 
         private readonly TreeMutationArea _mutationArea;
-        private readonly TreeMutationAreaVisualizer _visualizer;
         private readonly TerrainAreaService _terrainAreaService;
         private readonly AreaHighlightingService _areaHighlightingService;
         private readonly IBlockService _blockService;
@@ -31,13 +30,12 @@ namespace Timberborn.Splicetails {
 
         private SelectionToolProcessor _processor;
 
-        public TreeMutationAreaSelectionTool(TreeMutationArea mutationArea, TreeMutationAreaVisualizer visualizer,
+        public TreeMutationAreaSelectionTool(TreeMutationArea mutationArea,
                                              TerrainAreaService terrainAreaService,
                                              AreaHighlightingService areaHighlightingService, IBlockService blockService,
                                              SelectionToolProcessorFactory selectionToolProcessorFactory,
                                              MeasurableAreaDrawer measurableAreaDrawer, ILoc loc) {
             _mutationArea = mutationArea;
-            _visualizer = visualizer;
             _terrainAreaService = terrainAreaService;
             _areaHighlightingService = areaHighlightingService;
             _blockService = blockService;
@@ -53,13 +51,9 @@ namespace Timberborn.Splicetails {
         public ToolDescription DescribeTool() =>
             new ToolDescription.Builder(_loc.T(TitleLocKey)).AddSection(_loc.T(DescriptionLocKey)).Build();
 
-        public void Enter() {
-            _visualizer.SetToolActive(true);
-            _processor.Enter();
-        }
+        public void Enter() => _processor.Enter();
 
         public void Exit() {
-            _visualizer.SetToolActive(false);
             _areaHighlightingService.UnhighlightAll();
             _processor.Exit();
         }
