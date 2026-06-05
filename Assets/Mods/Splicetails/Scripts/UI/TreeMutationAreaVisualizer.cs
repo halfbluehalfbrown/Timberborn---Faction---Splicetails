@@ -12,16 +12,17 @@ namespace Timberborn.Splicetails {
 
         private readonly TreeMutationArea _mutationArea;
         private readonly AreaHighlightingService _areaHighlightingService;
-        private readonly ToolGroupService _toolGroupService;
         private readonly EventBus _eventBus;
+
+        private bool _visible;
+
+        public void SetToolActive(bool active) => _visible = active;
 
         public TreeMutationAreaVisualizer(TreeMutationArea mutationArea,
                                           AreaHighlightingService areaHighlightingService,
-                                          ToolGroupService toolGroupService,
                                           EventBus eventBus) {
             _mutationArea = mutationArea;
             _areaHighlightingService = areaHighlightingService;
-            _toolGroupService = toolGroupService;
             _eventBus = eventBus;
         }
 
@@ -30,10 +31,21 @@ namespace Timberborn.Splicetails {
         }
 
         public void LateUpdateSingleton() {
-            var active = _toolGroupService.ActiveToolGroup;
-            if (active == null || active.Id != TreeCuttingGroupId) return;
+            if (!_visible) return;
             foreach (var coord in _mutationArea.Area)
                 _areaHighlightingService.DrawTile(coord, MarkedTileColor);
+        }
+
+        [OnEvent]
+        public void OnToolGroupEntered(ToolGroupEnteredEvent e) {
+            if (e.ToolGroup != null && e.ToolGroup.Id == TreeCuttingGroupId)
+                _visible = true;
+        }
+
+        [OnEvent]
+        public void OnToolGroupExited(ToolGroupExitedEvent e) {
+            if (e.ToolGroup != null && e.ToolGroup.Id == TreeCuttingGroupId)
+                _visible = false;
         }
 
     }
