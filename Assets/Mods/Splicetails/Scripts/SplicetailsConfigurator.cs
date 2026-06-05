@@ -24,6 +24,10 @@ namespace Timberborn.Splicetails {
         protected override void Configure() {
             Bind<SplicetailsInitializer>().AsSingleton();
 
+            Bind<SplicerRangeService>().AsSingleton();
+            Bind<SplicerRangeTracker>().AsTransient();
+            Bind<SplicerRangeVisualizer>().AsSingleton();
+
             Bind<TreeMutationArea>().AsSingleton();
             Bind<TreeMutationAreaVisualizer>().AsSingleton();
             Bind<Mutatable>().AsTransient();
@@ -49,6 +53,7 @@ namespace Timberborn.Splicetails {
 
             builder.AddDecorator<UndergroundLodgeSpec, UndergroundLodgeExcavator>();
 
+            builder.AddDecorator<SerumApplicatorSpec, SplicerRangeTracker>();
             builder.AddDecorator<SerumApplicatorSpec, SerumApplicatorWorkplaceBehavior>();
             builder.AddDecorator<SerumApplicatorSpec, LaborWorkplaceBehavior>();
             builder.AddDecorator<WorkerSpec, SerumDeliveryBehavior>();

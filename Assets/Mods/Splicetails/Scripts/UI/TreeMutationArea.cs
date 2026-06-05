@@ -22,6 +22,7 @@ namespace Timberborn.Splicetails {
         private readonly EventBus _eventBus;
         private readonly ITerrainService _terrainService;
         private readonly MapEditorMode _mapEditorMode;
+        private readonly SplicerRangeService _splicerRangeService;
 
         private readonly HashSet<Vector3Int> _area = new HashSet<Vector3Int>();
         private readonly Dictionary<Vector3Int, Mutatable> _mutablesInArea = new Dictionary<Vector3Int, Mutatable>();
@@ -31,12 +32,14 @@ namespace Timberborn.Splicetails {
         public bool HasAnyTarget => _mutablesInArea.Count > 0;
 
         public TreeMutationArea(ISingletonLoader singletonLoader, IBlockService blockService,
-                                EventBus eventBus, ITerrainService terrainService, MapEditorMode mapEditorMode) {
+                                EventBus eventBus, ITerrainService terrainService, MapEditorMode mapEditorMode,
+                                SplicerRangeService splicerRangeService) {
             _singletonLoader = singletonLoader;
             _blockService = blockService;
             _eventBus = eventBus;
             _terrainService = terrainService;
             _mapEditorMode = mapEditorMode;
+            _splicerRangeService = splicerRangeService;
         }
 
         public void Load() {
@@ -58,8 +61,19 @@ namespace Timberborn.Splicetails {
 
         public bool IsMarked(Vector3Int coord) => _area.Contains(coord);
 
+        // Returns true if coord is within range of a Splicer (or if there are no Splicers
+        // yet / we are in the map editor — we skip the restriction in those cases so that
+        // pre-placed areas still load correctly from save files).
+        public bool IsInSplicerRange(Vector3Int coord) {
+            if (_mapEditorMode.IsMapEditor || !_splicerRangeService.HasAnySplicer)
+                return true;
+            return _splicerRangeService.IsInRange(coord);
+        }
+
         public void AddCoordinates(IEnumerable<Vector3Int> coordinates) {
             foreach (var coord in coordinates) {
+                if (!IsInSplicerRange(coord))
+                    continue;
                 _area.Add(coord);
                 TryAddMutable(coord);
             }
