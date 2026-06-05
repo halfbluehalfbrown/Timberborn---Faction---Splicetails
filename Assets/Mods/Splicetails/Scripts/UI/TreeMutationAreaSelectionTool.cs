@@ -18,7 +18,7 @@ namespace Timberborn.Splicetails {
         private static readonly string CursorKey = "CutTreeCursor";
         private static readonly string TitleLocKey = "Tool.SeumApplicationArea.Title";
         private static readonly string DescriptionLocKey = "Tool.SeumApplicationArea.Description";
-        private static readonly Color PreviewColor = new Color(0.0f, 0.85f, 0.75f, 0.6f);
+        private static readonly Color PreviewColor = new Color(1.0f, 0.15f, 0.15f, 0.6f);
 
         private readonly TreeMutationArea _mutationArea;
         private readonly TerrainAreaService _terrainAreaService;
