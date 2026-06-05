@@ -12,6 +12,10 @@ namespace Timberborn.Splicetails {
         private readonly AreaHighlightingService _areaHighlightingService;
         private readonly EventBus _eventBus;
 
+        private bool _toolActive;
+
+        public void SetToolActive(bool active) => _toolActive = active;
+
         public TreeMutationAreaVisualizer(TreeMutationArea mutationArea,
                                           AreaHighlightingService areaHighlightingService,
                                           EventBus eventBus) {
@@ -25,6 +29,7 @@ namespace Timberborn.Splicetails {
         }
 
         public void LateUpdateSingleton() {
+            if (!_toolActive) return;
             foreach (var coord in _mutationArea.Area)
                 _areaHighlightingService.DrawTile(coord, MarkedTileColor);
         }
