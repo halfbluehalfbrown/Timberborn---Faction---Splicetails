@@ -10,7 +10,7 @@ namespace Timberborn.Splicetails {
     public class TreeMutationAreaButton : IBottomBarElementsProvider {
 
         private static readonly string ToolGroupId = "TreeCutting";
-        private static readonly string SelectionImageKey = "TreeCuttingAreaSelectionTool";
+        private static readonly string SelectionImageKey = "MarkTreesForMutation";
         private static readonly string UnselectionImageKey = "CancelToolIcon";
 
         private readonly TreeMutationAreaSelectionTool _selectionTool;
