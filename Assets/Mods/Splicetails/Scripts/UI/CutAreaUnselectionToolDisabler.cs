@@ -7,10 +7,7 @@ namespace Timberborn.Splicetails {
     // so the vanilla-only button is redundant.
     public class CutAreaUnselectionToolDisabler : IToolDisabler {
 
-        // Resolved via reflection so we don't need to reference the internal type directly.
-        private static readonly System.Type VanillaType = System.Type.GetType(
-            "Timberborn.ForestryUI.TreeCuttingAreaUnselectionTool, Timberborn.ForestryUI");
-
-        public bool IsEnabled(ITool tool) => VanillaType == null || tool.GetType() != VanillaType;
+        public bool IsEnabled(ITool tool) =>
+            tool.GetType().Name != "TreeCuttingAreaUnselectionTool";
     }
 }
