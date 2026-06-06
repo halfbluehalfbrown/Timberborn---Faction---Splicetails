@@ -274,6 +274,14 @@ if loc_path.exists():
         if "," in line:
             defined_keys.add(line.split(",")[0].strip())
 
+VANILLA_LOC_KEYS = {
+    # Keys from vanilla buildings reused by Splicetails replacements
+    "Districts.DefaultDistrictName",
+    "Building.DistrictCenter.DisplayName",
+    "Building.DistrictCenter.Description",
+    "Building.DistrictCenter.FlavorDescription.Folktails",
+}
+
 loc_ok = True
 for p in (MOD_DATA / "Buildings").rglob("*.blueprint.json"):
     # Only check blueprints for Splicetails-specific buildings; vanilla LocKeys
@@ -282,7 +290,7 @@ for p in (MOD_DATA / "Buildings").rglob("*.blueprint.json"):
         continue
     content = p.read_text()
     for key in re.findall(r'LocKey":\s*"([^"]+)"', content):
-        if key and key not in defined_keys:
+        if key and key not in defined_keys and key not in VANILLA_LOC_KEYS:
             err(f"Missing localization key '{key}' (referenced in {p.name})")
             loc_ok = False
 if loc_ok:

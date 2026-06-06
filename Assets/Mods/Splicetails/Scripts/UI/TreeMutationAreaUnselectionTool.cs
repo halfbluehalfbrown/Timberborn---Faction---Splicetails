@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Timberborn.AreaSelectionSystemUI;
 using Timberborn.BlockSystem;
+using Timberborn.Forestry;
 using Timberborn.SelectionSystem;
 using Timberborn.Localization;
 using Timberborn.SelectionToolSystem;
@@ -20,6 +21,7 @@ namespace Timberborn.Splicetails {
         private static readonly Color PreviewColor = new Color(0.9f, 0.3f, 0.2f, 0.5f);
 
         private readonly TreeMutationArea _mutationArea;
+        private readonly TreeCuttingArea _treeCuttingArea;
         private readonly TerrainAreaService _terrainAreaService;
         private readonly AreaHighlightingService _areaHighlightingService;
         private readonly SelectionToolProcessorFactory _selectionToolProcessorFactory;
@@ -28,11 +30,14 @@ namespace Timberborn.Splicetails {
 
         private SelectionToolProcessor _processor;
 
-        public TreeMutationAreaUnselectionTool(TreeMutationArea mutationArea, TerrainAreaService terrainAreaService,
+        public TreeMutationAreaUnselectionTool(TreeMutationArea mutationArea,
+                                               TreeCuttingArea treeCuttingArea,
+                                               TerrainAreaService terrainAreaService,
                                                AreaHighlightingService areaHighlightingService,
                                                SelectionToolProcessorFactory selectionToolProcessorFactory,
                                                MeasurableAreaDrawer measurableAreaDrawer, ILoc loc) {
             _mutationArea = mutationArea;
+            _treeCuttingArea = treeCuttingArea;
             _terrainAreaService = terrainAreaService;
             _areaHighlightingService = areaHighlightingService;
             _selectionToolProcessorFactory = selectionToolProcessorFactory;
@@ -57,7 +62,7 @@ namespace Timberborn.Splicetails {
         private void PreviewCallback(IEnumerable<Vector3Int> blocks, Ray ray) {
             _areaHighlightingService.UnhighlightAll();
             foreach (var coord in _terrainAreaService.InMapLeveledCoordinates(blocks, ray)) {
-                if (_mutationArea.IsMarked(coord)) {
+                if (_mutationArea.IsMarked(coord) || _treeCuttingArea.IsInCuttingArea(coord)) {
                     _areaHighlightingService.DrawTile(coord, PreviewColor);
                     _measurableAreaDrawer.AddMeasurableCoordinates(coord);
                 }
@@ -69,6 +74,7 @@ namespace Timberborn.Splicetails {
             foreach (var coord in _terrainAreaService.InMapLeveledCoordinates(blocks, ray))
                 coords.Add(coord);
             _mutationArea.RemoveCoordinates(coords);
+            _treeCuttingArea.RemoveCoordinates(coords);
             _areaHighlightingService.UnhighlightAll();
         }
 

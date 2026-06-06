@@ -4,6 +4,7 @@ using Timberborn.BottomBarSystem;
 using Timberborn.Forestry;
 using Timberborn.LaborSystem;
 using Timberborn.TemplateInstantiation;
+using Timberborn.ToolSystem;
 using Timberborn.WorkSystem;
 
 namespace Timberborn.Splicetails {
@@ -36,6 +37,7 @@ namespace Timberborn.Splicetails {
             Bind<TreeMutationAreaSelectionTool>().AsSingleton();
             Bind<TreeMutationAreaUnselectionTool>().AsSingleton();
             Bind<TreeMutationAreaButton>().AsSingleton();
+            MultiBind<IToolDisabler>().To<CutAreaUnselectionToolDisabler>().AsSingleton();
 
             MultiBind<TemplateModule>().ToProvider(ProvideTemplateModule).AsSingleton();
             MultiBind<BottomBarModule>().ToProvider<BottomBarModuleProvider>().AsSingleton();
