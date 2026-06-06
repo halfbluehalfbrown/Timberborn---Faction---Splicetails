@@ -1,45 +1,52 @@
-using Timberborn.Rendering;
-using Timberborn.RootProviders;
+using Timberborn.SelectionSystem;
 using Timberborn.SingletonSystem;
+using Timberborn.ToolSystem;
+using UnityEngine;
 
 namespace Timberborn.Splicetails {
 
-    // Draws persistent teal ground tiles over all cells marked for serum application.
-    // Tiles are always visible so the player can see which trees are queued for mutation.
-    // Acts as the "range border" showing the Splicer's active working area.
-    public class TreeMutationAreaVisualizer : ILoadableSingleton {
+    public class TreeMutationAreaVisualizer : ILoadableSingleton, ILateUpdatableSingleton {
 
-        private static readonly UnityEngine.Color TealTileColor = new UnityEngine.Color(0.0f, 0.75f, 0.85f, 0.6f);
+        private static readonly string TreeCuttingGroupId = "TreeCutting";
+        private static readonly Color MarkedTileColor = new Color(0.0f, 0.75f, 0.85f, 0.5f);
 
         private readonly TreeMutationArea _mutationArea;
-        private readonly AreaTileDrawerFactory _areaTileDrawerFactory;
-        private readonly RootObjectProvider _rootObjectProvider;
+        private readonly AreaHighlightingService _areaHighlightingService;
         private readonly EventBus _eventBus;
 
-        private AreaTileDrawer _areaTileDrawer;
+        private bool _visible;
+
+        public void SetToolActive(bool active) => _visible = active;
 
         public TreeMutationAreaVisualizer(TreeMutationArea mutationArea,
-                                          AreaTileDrawerFactory areaTileDrawerFactory,
-                                          RootObjectProvider rootObjectProvider,
+                                          AreaHighlightingService areaHighlightingService,
                                           EventBus eventBus) {
             _mutationArea = mutationArea;
-            _areaTileDrawerFactory = areaTileDrawerFactory;
-            _rootObjectProvider = rootObjectProvider;
+            _areaHighlightingService = areaHighlightingService;
             _eventBus = eventBus;
         }
 
         public void Load() {
-            var parent = _rootObjectProvider.CreateRootObject("TreeMutationAreaVisualizer");
-            _areaTileDrawer = _areaTileDrawerFactory.Create(TealTileColor, parent);
-            _areaTileDrawer.HideAllTiles();
             _eventBus.Register(this);
         }
 
-        [OnEvent]
-        public void OnMutationAreaChanged(TreeMutationAreaChangedEvent _) => Redraw();
-
-        private void Redraw() {
-            _areaTileDrawer.UpdateArea(_mutationArea.Area);
+        public void LateUpdateSingleton() {
+            if (!_visible) return;
+            foreach (var coord in _mutationArea.Area)
+                _areaHighlightingService.DrawTile(coord, MarkedTileColor);
         }
+
+        [OnEvent]
+        public void OnToolGroupEntered(ToolGroupEnteredEvent e) {
+            if (e.ToolGroup != null && e.ToolGroup.Id == TreeCuttingGroupId)
+                _visible = true;
+        }
+
+        [OnEvent]
+        public void OnToolGroupExited(ToolGroupExitedEvent e) {
+            if (e.ToolGroup != null && e.ToolGroup.Id == TreeCuttingGroupId)
+                _visible = false;
+        }
+
     }
 }

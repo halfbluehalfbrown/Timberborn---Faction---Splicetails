@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Timberborn.BlockSystem;
 using Timberborn.Forestry;
 using Timberborn.MapStateSystem;
@@ -22,6 +23,7 @@ namespace Timberborn.Splicetails {
         private readonly EventBus _eventBus;
         private readonly ITerrainService _terrainService;
         private readonly MapEditorMode _mapEditorMode;
+        private readonly TreeCuttingArea _treeCuttingArea;
 
         private readonly HashSet<Vector3Int> _area = new HashSet<Vector3Int>();
         private readonly Dictionary<Vector3Int, Mutatable> _mutablesInArea = new Dictionary<Vector3Int, Mutatable>();
@@ -31,12 +33,14 @@ namespace Timberborn.Splicetails {
         public bool HasAnyTarget => _mutablesInArea.Count > 0;
 
         public TreeMutationArea(ISingletonLoader singletonLoader, IBlockService blockService,
-                                EventBus eventBus, ITerrainService terrainService, MapEditorMode mapEditorMode) {
+                                EventBus eventBus, ITerrainService terrainService, MapEditorMode mapEditorMode,
+                                TreeCuttingArea treeCuttingArea) {
             _singletonLoader = singletonLoader;
             _blockService = blockService;
             _eventBus = eventBus;
             _terrainService = terrainService;
             _mapEditorMode = mapEditorMode;
+            _treeCuttingArea = treeCuttingArea;
         }
 
         public void Load() {
@@ -59,7 +63,12 @@ namespace Timberborn.Splicetails {
         public bool IsMarked(Vector3Int coord) => _area.Contains(coord);
 
         public void AddCoordinates(IEnumerable<Vector3Int> coordinates) {
-            foreach (var coord in coordinates) {
+            var coordList = coordinates.ToList();
+            // Mutual exclusion: serum marking takes priority over tree cutting.
+            // Remove any overlapping cutting-area tiles so the same tile is never
+            // designated for both operations at once.
+            _treeCuttingArea.RemoveCoordinates(coordList);
+            foreach (var coord in coordList) {
                 _area.Add(coord);
                 TryAddMutable(coord);
             }
@@ -82,6 +91,19 @@ namespace Timberborn.Splicetails {
 
         [OnEvent]
         public void OnTreeAdded(TreeAddedToCuttingAreaEvent _) => Refresh();
+
+        [OnEvent]
+        public void OnCuttingAreaChanged(TreeCuttingAreaChangedEvent _) {
+            // Mutual exclusion: if the player just marked tiles for cutting, remove any
+            // of those tiles from the serum area so ownership is unambiguous.
+            var overlap = _area.Where(c => _treeCuttingArea.IsInCuttingArea(c)).ToList();
+            if (overlap.Count == 0) return;
+            foreach (var coord in overlap) {
+                _area.Remove(coord);
+                _mutablesInArea.Remove(coord);
+            }
+            _eventBus.Post(new TreeMutationAreaChangedEvent());
+        }
 
         private void TryAddMutable(Vector3Int coord) {
             var tree = _blockService.GetBottomObjectComponentAt<TreeComponent>(coord);

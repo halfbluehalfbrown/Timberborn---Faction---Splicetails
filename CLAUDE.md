@@ -223,7 +223,11 @@ Register: `MultiBind<IBlockObjectValidator>().To<MyValidator>().AsSingleton()` �
 - Faction visual identity should use texture overrides, not mesh replacement
 
 ### Area Marking Tools
-- Persistent tile overlays use `AreaTileDrawer.UpdateArea(IEnumerable<Vector3Int>)` — only visible when called, auto-hides with `HideAllTiles()`
+- **`AreaTileDrawer` has THREE methods** (verified from `TreeCuttingAreaVisualizer` source):
+  - `UpdateArea(coords)` — sets WHICH tiles to draw (does NOT make them visible by itself)
+  - `ShowAllTiles()` — makes the tiles visible (must call after `UpdateArea`)
+  - `HideAllTiles()` — hides all tiles
+  - Correct pattern: `UpdateArea(coords)` then `ShowAllTiles()`. Calling only `UpdateArea` without `ShowAllTiles` shows nothing.
 - Preview tiles during selection use `AreaHighlightingService.DrawTile(coord, color)` — cleared when tool exits
 - Wire show/hide to `ToolGroupEnteredEvent`/`ToolGroupExitedEvent` with the tool group ID
 

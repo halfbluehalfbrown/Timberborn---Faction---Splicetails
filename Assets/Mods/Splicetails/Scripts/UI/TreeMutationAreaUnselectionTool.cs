@@ -20,6 +20,7 @@ namespace Timberborn.Splicetails {
         private static readonly Color PreviewColor = new Color(0.9f, 0.3f, 0.2f, 0.5f);
 
         private readonly TreeMutationArea _mutationArea;
+        private readonly TreeMutationAreaVisualizer _visualizer;
         private readonly TerrainAreaService _terrainAreaService;
         private readonly AreaHighlightingService _areaHighlightingService;
         private readonly SelectionToolProcessorFactory _selectionToolProcessorFactory;
@@ -28,11 +29,14 @@ namespace Timberborn.Splicetails {
 
         private SelectionToolProcessor _processor;
 
-        public TreeMutationAreaUnselectionTool(TreeMutationArea mutationArea, TerrainAreaService terrainAreaService,
+        public TreeMutationAreaUnselectionTool(TreeMutationArea mutationArea,
+                                               TreeMutationAreaVisualizer visualizer,
+                                               TerrainAreaService terrainAreaService,
                                                AreaHighlightingService areaHighlightingService,
                                                SelectionToolProcessorFactory selectionToolProcessorFactory,
                                                MeasurableAreaDrawer measurableAreaDrawer, ILoc loc) {
             _mutationArea = mutationArea;
+            _visualizer = visualizer;
             _terrainAreaService = terrainAreaService;
             _areaHighlightingService = areaHighlightingService;
             _selectionToolProcessorFactory = selectionToolProcessorFactory;
@@ -47,9 +51,13 @@ namespace Timberborn.Splicetails {
         public ToolDescription DescribeTool() =>
             new ToolDescription.Builder(_loc.T(TitleLocKey)).AddSection(_loc.T(DescriptionLocKey)).Build();
 
-        public void Enter() => _processor.Enter();
+        public void Enter() {
+            _visualizer.SetToolActive(true);
+            _processor.Enter();
+        }
 
         public void Exit() {
+            _visualizer.SetToolActive(false);
             _areaHighlightingService.UnhighlightAll();
             _processor.Exit();
         }
