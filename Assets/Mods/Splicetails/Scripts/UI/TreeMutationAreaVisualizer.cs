@@ -1,15 +1,15 @@
 using Timberborn.Rendering;
 using Timberborn.RootProviders;
 using Timberborn.SingletonSystem;
+using Timberborn.ToolSystem;
+using UnityEngine;
 
 namespace Timberborn.Splicetails {
 
-    // Draws persistent teal ground tiles over all cells marked for serum application.
-    // Tiles are always visible so the player can see which trees are queued for mutation.
-    // Acts as the "range border" showing the Splicer's active working area.
     public class TreeMutationAreaVisualizer : ILoadableSingleton {
 
-        private static readonly UnityEngine.Color TealTileColor = new UnityEngine.Color(0.0f, 0.75f, 0.85f, 0.6f);
+        private static readonly string TreeCuttingGroupId = "TreeCutting";
+        private static readonly Color TealTileColor = new Color(0.0f, 0.75f, 0.85f, 0.6f);
 
         private readonly TreeMutationArea _mutationArea;
         private readonly AreaTileDrawerFactory _areaTileDrawerFactory;
@@ -17,6 +17,7 @@ namespace Timberborn.Splicetails {
         private readonly EventBus _eventBus;
 
         private AreaTileDrawer _areaTileDrawer;
+        private bool _visible;
 
         public TreeMutationAreaVisualizer(TreeMutationArea mutationArea,
                                           AreaTileDrawerFactory areaTileDrawerFactory,
@@ -35,11 +36,33 @@ namespace Timberborn.Splicetails {
             _eventBus.Register(this);
         }
 
+        // Called by the mark and unmark tools on Enter/Exit.
+        public void SetToolActive(bool active) {
+            _visible = active;
+            if (active) Redraw();
+            else _areaTileDrawer.HideAllTiles();
+        }
+
+        // Backup: also respond to the group-level open/close event so tiles appear
+        // even if the individual tool Enter fires before SetToolActive is called.
         [OnEvent]
-        public void OnMutationAreaChanged(TreeMutationAreaChangedEvent _) => Redraw();
+        public void OnToolGroupEntered(ToolGroupEnteredEvent e) {
+            if (e.ToolGroup?.Id == TreeCuttingGroupId) SetToolActive(true);
+        }
+
+        [OnEvent]
+        public void OnToolGroupExited(ToolGroupExitedEvent e) {
+            if (e.ToolGroup?.Id == TreeCuttingGroupId) SetToolActive(false);
+        }
+
+        [OnEvent]
+        public void OnMutationAreaChanged(TreeMutationAreaChangedEvent _) {
+            if (_visible) Redraw();
+        }
 
         private void Redraw() {
             _areaTileDrawer.UpdateArea(_mutationArea.Area);
+            _areaTileDrawer.ShowAllTiles();
         }
     }
 }
