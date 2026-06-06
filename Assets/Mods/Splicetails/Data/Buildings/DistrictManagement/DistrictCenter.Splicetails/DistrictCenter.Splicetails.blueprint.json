@@ -454,15 +454,7 @@
   },
   "WorkplaceSlotManagerSpec": {},
   "TransformSlotInitializerSpec": {
-    "Slots": [
-      {
-        "SlotKeyword": "Entrance",
-        "Animation": "Sitting",
-        "Inanimate": false,
-        "RandomizeYRotation": false,
-        "WaterSlot": false
-      }
-    ]
+    "Slots": []
   },
   "WorkplaceIlluminatorSpec": {},
   "FloodableFireSpec": {},
