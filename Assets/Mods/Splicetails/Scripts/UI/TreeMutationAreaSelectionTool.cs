@@ -19,6 +19,7 @@ namespace Timberborn.Splicetails {
         private static readonly string TitleLocKey = "Tool.SeumApplicationArea.Title";
         private static readonly string DescriptionLocKey = "Tool.SeumApplicationArea.Description";
         private static readonly Color PreviewColor = new Color(0.0f, 0.85f, 0.75f, 0.6f);
+        private static readonly Color OutOfRangeColor = new Color(0.5f, 0.5f, 0.5f, 0.35f);
 
         private readonly TreeMutationArea _mutationArea;
         private readonly TerrainAreaService _terrainAreaService;
@@ -61,8 +62,10 @@ namespace Timberborn.Splicetails {
             _areaHighlightingService.UnhighlightAll();
             foreach (var coord in _terrainAreaService.InMapLeveledCoordinates(blocks, ray)) {
                 if (!_mutationArea.IsMarked(coord)) {
-                    _areaHighlightingService.DrawTile(coord, PreviewColor);
-                    _measurableAreaDrawer.AddMeasurableCoordinates(coord);
+                    bool inRange = _mutationArea.IsInSplicerRange(coord);
+                    _areaHighlightingService.DrawTile(coord, inRange ? PreviewColor : OutOfRangeColor);
+                    if (inRange)
+                        _measurableAreaDrawer.AddMeasurableCoordinates(coord);
                 }
             }
         }
